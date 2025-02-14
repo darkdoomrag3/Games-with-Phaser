@@ -34,10 +34,10 @@ Before you begin, ensure you have the following installed:
 2. Navigate to the project directory:
 
    ```bash
-  cd Games-with-Phaser   
+   cd Games-with-Phaser   
    ```
 
 3. Install dependencies:
    ```bash
- npm install
+   npm install
    ```
