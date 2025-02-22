@@ -10,12 +10,11 @@ export default class GameScene extends Phaser.Scene {
     this.spawnDelay = 1000;
     this.lastSpawnTime = 0;
     this.playerHealth = 100;
-    this.isInvulnerable = false; 
+    this.isInvulnerable = false;
     this.invulnerabilityDuration = 1000;
   }
 
   create() {
-
     const { width, height } = this.scale;
 
     this.createBackground();
@@ -24,17 +23,29 @@ export default class GameScene extends Phaser.Scene {
     this.createHealthBar();
     this.createItems();
     this.createControls();
+    this.pauseKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ESC
+    );
 
-    this.scale.on('resize', this.resize, this);
+
+    const pauseButton = this.add
+      .text(this.scale.width - 20, 20, "⏸️", {
+        fontSize: "24px",
+        fill: "#fff",
+      })
+      .setOrigin(1, 0)
+      .setInteractive()
+      .on("pointerdown", () => this.pauseGame());
+    this.scale.on("resize", this.resize, this);
   }
 
   createBackground() {
     const { width, height } = this.scale;
-    
-    const bg = this.add.image(width/2, height/2, 'sky')
-      .setName('sky')  
+
+    const bg = this.add
+      .image(width / 2, height / 2, "sky")
+      .setName("sky")
       .setDepth(0);
-    
 
     const scaleX = width / bg.width;
     const scaleY = height / bg.height;
@@ -45,26 +56,22 @@ export default class GameScene extends Phaser.Scene {
   resize(gameSize) {
     const { width, height } = gameSize;
 
-  
-    const bg = this.children.getByName('sky');
+    const bg = this.children.getByName("sky");
     if (bg) {
       const scaleX = width / bg.width;
       const scaleY = height / bg.height;
       const scale = Math.max(scaleX, scaleY);
       bg.setScale(scale);
-      bg.setPosition(width/2, height/2);
+      bg.setPosition(width / 2, height / 2);
     }
 
- 
     if (this.player) {
       this.player.x = width * 0.1;
       this.player.y = height * 0.5;
-      
-  
-        const playerScale = 0.07;
-        this.player.setScale(playerScale);
-    }
 
+      const playerScale = 0.07;
+      this.player.setScale(playerScale);
+    }
 
     if (this.healthBar) {
       this.healthBar.clear();
@@ -76,20 +83,17 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-
   createplayer() {
     const { width, height } = this.scale;
 
-    this.player = this.physics.add.sprite(
-      width * 0.1,
-      height * 0.5,
-      "player"
-    ).setOrigin(0);
-    
+    this.player = this.physics.add
+      .sprite(width * 0.1, height * 0.5, "player")
+      .setOrigin(0);
+
     // Make player bigger - adjust this number to change size
     const playerScale = 0.13; // Try different values: 0.05 for smaller, 0.1 for bigger
     this.player.setScale(playerScale);
-    
+
     this.player.setDepth(1);
     this.player.body.allowGravity = false;
 
@@ -103,14 +107,13 @@ export default class GameScene extends Phaser.Scene {
 
   createHealthBar() {
     this.healthBar = this.add.graphics();
-    this.healthText = this.add.text(220, 10, '', {
-      fontSize: '20px',
-      fill: '#ffffff'
+    this.healthText = this.add.text(220, 10, "", {
+      fontSize: "20px",
+      fill: "#ffffff",
     });
-    
+
     this.updateHealthBar();
   }
-
 
   createItems() {
     this.items = this.physics.add.group();
@@ -131,6 +134,14 @@ export default class GameScene extends Phaser.Scene {
     this.handleplayerMovement();
     this.handleItemSpawning(time);
     this.updateItems();
+    if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+      this.pauseGame();
+    }
+  }
+
+  pauseGame() {
+    this.scene.pause();
+    this.scene.launch("PauseScene");
   }
 
   handleplayerMovement() {
@@ -154,16 +165,8 @@ export default class GameScene extends Phaser.Scene {
     const scaledWidth = this.player.width * this.player.scaleX;
     const scaledHeight = this.player.height * this.player.scaleY;
 
-    this.player.x = Phaser.Math.Clamp(
-      this.player.x,
-      0,
-      width - scaledWidth
-    );
-    this.player.y = Phaser.Math.Clamp(
-      this.player.y,
-      0,
-      height - scaledHeight
-    );
+    this.player.x = Phaser.Math.Clamp(this.player.x, 0, width - scaledWidth);
+    this.player.y = Phaser.Math.Clamp(this.player.y, 0, height - scaledHeight);
   }
 
   handleItemSpawning(time) {
@@ -186,11 +189,11 @@ export default class GameScene extends Phaser.Scene {
   spawnItem() {
     const { width, height } = this.scale;
     const frame = Phaser.Math.Between(0);
-    
+
     const item = this.items.create(
-      width, 
-      Phaser.Math.Between(0, height), 
-      "icons", 
+      width,
+      Phaser.Math.Between(0, height),
+      "icons",
       frame
     );
 
@@ -200,16 +203,14 @@ export default class GameScene extends Phaser.Scene {
 
     item.setOrigin(0);
     item.body.allowGravity = false;
-    
+
     // Adjust collision box to match new scale
-    const collisionWidth = 90 * 0.6;  // Changed from 50 to 120
+    const collisionWidth = 90 * 0.6; // Changed from 50 to 120
     const collisionHeight = 90 * 0.6;
     item.body.setSize(collisionWidth, collisionHeight);
     item.body.offset.x = (item.width * scaleFactor - collisionWidth) / 2;
     item.body.offset.y = (item.height * scaleFactor - collisionHeight) / 2;
   }
-
-
 
   handleCollision(player, item) {
     // If player is invulnerable, ignore the collision
@@ -223,13 +224,13 @@ export default class GameScene extends Phaser.Scene {
     item.destroy();
 
     this.isInvulnerable = true;
-    
+
     this.tweens.add({
       targets: this.player,
       alpha: 0.5,
       duration: 100,
       yoyo: false,
-      repeat: 2
+      repeat: 2,
     });
 
     // Reset invulnerability after duration
@@ -245,7 +246,7 @@ export default class GameScene extends Phaser.Scene {
 
   updateHealthBar() {
     this.healthBar.clear();
-    
+
     this.healthBar.fillStyle(0xff0000);
     this.healthBar.fillRect(10, 10, 200, 20);
     this.healthBar.fillStyle(0x00ff00);

@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import BootScene from "./scenes/BootScene";
 import GameScene from "./scenes/GameScene";
 import GameOverScene from "./scenes/GameOverScene";
+import PauseScene from "./scenes/PauseScene";
 
 const config = {
   type: Phaser.AUTO,
@@ -26,7 +27,7 @@ const config = {
       gravity: { y: 0 },
     },
   },
-  scene: [BootScene, GameScene, GameOverScene]
+  scene: [BootScene, GameScene, GameOverScene, PauseScene]
 };
 
 export default config;
